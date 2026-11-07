@@ -1,0 +1,804 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bead Studio | Custom Bracelet Designer</title>
+
+<style>
+:root {
+  --pink: #f4c5d4;
+  --cream: #fff9f3;
+  --brown: #49352f;
+  --purple: #d9c9f4;
+  --border: #eee2df;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: var(--brown);
+  background: var(--cream);
+}
+
+header {
+  padding: 20px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo { font-size: 23px; font-weight: 800; }
+.cart-count { font-weight: bold; }
+
+.hero {
+  padding: 55px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #f9dce5, #eee3ff, #fff0d9);
+}
+
+.hero h1 {
+  font-size: clamp(32px, 6vw, 54px);
+  margin: 0 0 12px;
+}
+
+.hero p { line-height: 1.6; }
+
+main {
+  max-width: 1100px;
+  padding: 30px 18px 60px;
+  margin: auto;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.panel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 20px;
+  min-width: 0;
+}
+
+h2 { margin-top: 0; }
+
+label {
+  display: block;
+  font-weight: bold;
+  margin: 18px 0 8px;
+}
+
+select, input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d9ccc6;
+  border-radius: 10px;
+  background: white;
+  color: var(--brown);
+  font: inherit;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--brown);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.swatch {
+  width: 39px;
+  height: 39px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  cursor: pointer;
+}
+
+.swatch.selected {
+  outline: 3px solid var(--brown);
+  outline-offset: 2px;
+}
+
+.swatch:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.palette-name {
+  font-size: 13px;
+  margin: 8px 0 0;
+  color: #786b65;
+}
+
+.choice-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.choice {
+  border: 1px solid #e5d7d2;
+  border-radius: 12px;
+  padding: 12px 5px;
+  background: #fffaf8;
+  color: var(--brown);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.choice.selected {
+  border: 2px solid var(--brown);
+  background: #f9eaf0;
+}
+
+.choice span { display: block; font-size: 22px; }
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: normal;
+  margin: 12px 0;
+}
+
+.preview-wrap {
+  background: #fff9f3;
+  border-radius: 18px;
+  padding: 18px 10px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.preview {
+  position: relative;
+  width: min(100%, 330px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.bead {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid #00000025;
+  box-shadow:
+    inset -4px -4px 6px #00000017,
+    inset 3px 3px 5px #ffffffa0,
+    0 2px 3px #0000000c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #49352f;
+  transition: left .2s, top .2s, background .2s;
+}
+
+.bead.dual {
+  background-image: linear-gradient(135deg, transparent 48%, #ffffffaa 49%, #ffffffaa 53%, transparent 54%);
+}
+
+.bead.bohemian {
+  border: 2px dotted #ffffffbb;
+  box-shadow: inset 0 0 0 3px #0000000c;
+}
+
+.bead.glass {
+  box-shadow:
+    inset -4px -4px 6px #00000017,
+    inset 3px 3px 5px #ffffffc9,
+    0 2px 3px #0000000c;
+}
+
+.bead.letter-bead {
+  background: #fffdf9 !important;
+  border: 1px solid #cbb8ab;
+  box-shadow: inset -2px -2px 3px #00000012;
+  font-size: 13px;
+}
+
+.bead.glow {
+  background: #eaffc4 !important;
+  box-shadow: 0 0 9px #b5ed74, inset 0 0 5px white;
+}
+
+.charm-preview {
+  min-height: 24px;
+  margin-top: 8px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.price {
+  font-size: 35px;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+button {
+  border: 0;
+  background: var(--brown);
+  color: white;
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button:hover { opacity: .88; }
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid #c7a5dc;
+  outline-offset: 2px;
+}
+
+.secondary { background: #f1e6ed; color: var(--brown); }
+.full { width: 100%; margin-top: 12px; }
+.hint { font-size: 13px; color: #786b65; line-height: 1.5; }
+.cart-item { border-bottom: 1px solid #eee; padding: 12px 0; }
+.cart-item button { padding: 8px 11px; margin-top: 8px; }
+.cart-total { font-size: 21px; font-weight: bold; }
+.empty { color: #786b65; }
+.summary-box { background: #fff9f3; padding: 14px; border-radius: 12px; line-height: 1.6; }
+[hidden] { display: none !important; }
+
+footer {
+  text-align: center;
+  padding: 25px;
+  background: white;
+}
+
+@media (max-width: 760px) {
+  .layout { grid-template-columns: 1fr; }
+  header { padding: 16px 18px; }
+  .panel { padding: 17px; }
+  .hero { padding: 40px 18px; }
+  .bead { width: 29px; height: 29px; font-size: 11px; }
+  .bead.letter-bead { font-size: 12px; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="logo">♡ Bead Studio</div>
+  <div class="cart-count">Cart: <span id="cartCount">0</span></div>
+</header>
+
+<section class="hero">
+  <h1>Your style. Your beads.</h1>
+  <p>Design a bracelet that's completely you.</p>
+  <p>Handmade with love in South Africa ♡</p>
+</section>
+
+<main>
+<div class="layout">
+
+<section class="panel">
+  <h2>Design your bracelet ♡</h2>
+  <p class="hint">Mix your favourite colours, choose your beads and make it yours.</p>
+
+  <label for="palette">1. Choose a colour palette</label>
+  <select id="palette">
+    <option value="cottonCandy">Cotton Candy</option>
+    <option value="lavenderDream">Lavender Dream</option>
+    <option value="lemonMilk">Lemon Milk</option>
+    <option value="mintGarden">Mint Garden</option>
+    <option value="oceanBreeze">Ocean Breeze</option>
+    <option value="peachyKeen">Peachy Keen</option>
+  </select>
+
+  <p class="palette-name" id="paletteDescription">Soft pinks and dreamy lilacs.</p>
+
+  <label>2. Choose up to three colours</label>
+  <div class="swatches" id="swatches"></div>
+  <p class="hint"><span id="colourCount">1</span>/3 colours selected. Select a colour again to remove it.</p>
+
+  <label>3. Choose your bead style</label>
+  <div class="choice-row" id="beadStyles">
+    <button type="button" class="choice selected" data-style="glass">
+      <span>💎</span>Glass
+      <br>+R5
+    </button>
+    <button type="button" class="choice" data-style="dual">
+      <span>🌓</span>Dual-colour
+      <br>+R7
+    </button>
+    <button type="button" class="choice" data-style="bohemian">
+      <span>🌼</span>Bohemian
+      <br>+R9
+    </button>
+  </div>
+
+  <label for="letters">4. Add name beads (optional)</label>
+  <input id="letters" maxlength="10" placeholder="e.g. YOUR NAME" autocomplete="off">
+  <p class="hint">Up to 10 letters or numbers. Spaces are allowed.</p>
+
+  <label class="check-row">
+    <input id="glow" type="checkbox">
+    Glow-in-the-dark name beads (+R5)
+  </label>
+
+  <label for="charm">5. Choose your charm</label>
+  <select id="charm">
+    <option value="none">No charm — R0</option>
+    <option value="heart">Heart — +R5</option>
+    <option value="flower">Flower — +R7</option>
+    <option value="star">Star — +R5</option>
+    <option value="smiley">Smiley — +R7</option>
+  </select>
+
+  <label for="metal">6. Charm colour</label>
+  <select id="metal">
+    <option value="gold">Gold ✨</option>
+    <option value="silver">Silver ✨</option>
+  </select>
+
+  <label for="size">7. Bracelet size</label>
+  <select id="size">
+    <option value="small">Small</option>
+    <option value="medium" selected>Medium</option>
+    <option value="large">Large</option>
+  </select>
+
+  <div class="preview-wrap">
+    <strong>Your bracelet preview</strong>
+    <div class="preview" id="preview" role="img" aria-label="Circular bracelet preview with 21 bead positions"></div>
+    <div class="charm-preview" id="charmPreview"></div>
+    <p class="hint">Your design has 21 bead positions. The preview is illustrative.</p>
+  </div>
+
+  <p class="hint">Your current design</p>
+  <div class="price" id="price">R45.00</div>
+  <p class="hint" id="priceBreakdown">Classic bracelet: R45.00</p>
+
+  <button class="full" id="addToCart" type="button">♡ Add bracelet to cart</button>
+</section>
+
+<aside>
+  <section class="panel">
+    <h2>Your cart 🛍️</h2>
+    <div id="cartItems"><p class="empty">Your cart is empty.</p></div>
+    <p class="cart-total">Total: <span id="total">R0.00</span></p>
+    <p class="hint">Delivery is not included. Delivery costs can be confirmed separately.</p>
+    <button class="full" id="checkout" type="button">Continue to checkout</button>
+  </section>
+
+  <section class="panel" id="checkoutPanel" hidden>
+    <h2>Checkout ♡</h2>
+    <p class="hint">This is a demonstration checkout. You do not need to enter real personal details.</p>
+
+    <form id="orderForm">
+      <label for="customer">Name (demo)</label>
+      <input id="customer" placeholder="Example Customer" required>
+
+      <label for="email">Email (demo)</label>
+      <input id="email" type="email" placeholder="example@email.com" required>
+
+      <label for="phone">Contact number (demo)</label>
+      <input id="phone" type="tel" placeholder="Example number" required>
+
+      <label for="address">Delivery address (demo)</label>
+      <input id="address" placeholder="Example address" required>
+
+      <button class="full" type="submit">Prepare order summary</button>
+    </form>
+
+    <div id="orderSummary" aria-live="polite"></div>
+    <p class="hint">Demo only: no details are sent to a server, no order is placed, and no payment is taken.</p>
+  </section>
+</aside>
+
+</div>
+</main>
+
+<footer>
+  <p>♡ Bead Studio — Made just for you.</p>
+  <p class="hint">Custom bracelets, designed by you.</p>
+</footer>
+
+<script>
+const palettes = {
+  cottonCandy: {
+    name: "Cotton Candy",
+    description: "Soft pinks and dreamy lilacs.",
+    colours: ["#F4A9C5", "#D9C9F4", "#FFFFFF"]
+  },
+  lavenderDream: {
+    name: "Lavender Dream",
+    description: "Gentle purples, blues and creamy white.",
+    colours: ["#C7B4EF", "#A8D5F0", "#FFF9F3"]
+  },
+  lemonMilk: {
+    name: "Lemon Milk",
+    description: "Butter yellow, blush pink and vanilla.",
+    colours: ["#F4D66D", "#F4C5D4", "#FFF5D9"]
+  },
+  mintGarden: {
+    name: "Mint Garden",
+    description: "Fresh mint, soft lilac and pale pink.",
+    colours: ["#A6D4B5", "#D9C9F4", "#F4A9C5"]
+  },
+  oceanBreeze: {
+    name: "Ocean Breeze",
+    description: "Sky blue, aqua and pearl white.",
+    colours: ["#A8D5F0", "#B8E4DF", "#FFFFFF"]
+  },
+  peachyKeen: {
+    name: "Peachy Keen",
+    description: "Peach, warm pink and buttery yellow.",
+    colours: ["#FFC6A8", "#F4A9C5", "#F4D66D"]
+  }
+};
+
+const stylePrices = {
+  glass: 0,
+  dual: 5,
+  bohemian: 8
+};
+
+const charmPrices = {
+  none: 0,
+  heart: 5,
+  flower: 7,
+  star: 5,
+  smiley: 7
+};
+
+const charmIcons = {
+  none: "",
+  heart: "♥",
+  flower: "✿",
+  star: "★",
+  smiley: "☻"
+};
+
+const charmMetalColours = {
+  gold: "#c49a35",
+  silver: "#9ca3af"
+};
+
+const basePrice = 45;
+let selectedColours = [palettes.cottonCandy.colours[0]];
+let selectedBeadStyle = "glass";
+let cart = [];
+
+const $ = id => document.getElementById(id);
+
+const money = amount =>
+  "R" + amount.toLocaleString("en-ZA", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+function renderSwatches() {
+  const palette = palettes[$("palette").value];
+  const container = $("swatches");
+  container.replaceChildren();
+
+  $("paletteDescription").textContent = palette.description;
+
+  // Keep existing choices that belong to the new palette.
+  selectedColours = selectedColours.filter(c => palette.colours.includes(c));
+
+  if (selectedColours.length === 0) {
+    selectedColours = [palette.colours[0]];
+  }
+
+  palette.colours.forEach(colour => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "swatch";
+    button.style.background = colour;
+    button.dataset.colour = colour;
+    button.setAttribute("aria-label", "Select colour " + colour);
+    button.setAttribute("aria-pressed", String(selectedColours.includes(colour)));
+
+    if (selectedColours.includes(colour)) {
+      button.classList.add("selected");
+    }
+
+    button.addEventListener("click", () => {
+      if (selectedColours.includes(colour)) {
+        if (selectedColours.length === 1) {
+          alert("Please keep at least one colour selected.");
+          return;
+        }
+        selectedColours = selectedColours.filter(c => c !== colour);
+      } else {
+        if (selectedColours.length >= 3) {
+          alert("You can choose up to three colours.");
+          return;
+        }
+        selectedColours.push(colour);
+      }
+
+      renderSwatches();
+      drawPreview();
+    });
+
+    container.appendChild(button);
+  });
+
+  $("colourCount").textContent = selectedColours.length;
+}
+
+function currentDesign() {
+  const letters = $("letters").value
+    .toUpperCase()
+    .replace(/[^A-Z0-9 ]/g, "")
+    .trim()
+    .slice(0, 10);
+
+  const charm = $("charm").value;
+  const beadStyle = selectedBeadStyle;
+  const glow = $("glow").checked && letters.length > 0;
+  const size = $("size").value;
+
+  const extras = {
+    beadStyle: stylePrices[beadStyle],
+    name: letters.length > 0 ? 10 : 0,
+    glow: glow ? 5 : 0,
+    charm: charmPrices[charm]
+  };
+
+  const price = basePrice +
+    extras.beadStyle +
+    extras.name +
+    extras.glow +
+    extras.charm;
+
+  return {
+    palette: palettes[$("palette").value].name,
+    colours: [...selectedColours],
+    beadStyle,
+    letters,
+    glow,
+    charm,
+    metal: $("metal").value,
+    size,
+    extras,
+    price
+  };
+}
+
+function drawPreview() {
+  const d = currentDesign();
+  const preview = $("preview");
+  preview.replaceChildren();
+
+  // Exactly 21 positions, arranged around a circular path.
+  const totalBeads = 21;
+  const box = preview.clientWidth || 300;
+  const radius = box * 0.385;
+  const beadSize = window.innerWidth <= 760 ? 29 : 34;
+  const centre = box / 2;
+
+  // Name letters replace bead positions rather than adding extra beads.
+  const letters = d.letters.replace(/ /g, "").slice(0, totalBeads);
+
+  for (let i = 0; i < totalBeads; i++) {
+    const angle = (i / totalBeads) * Math.PI * 2 - Math.PI / 2;
+    const x = centre + Math.cos(angle) * radius;
+    const y = centre + Math.sin(angle) * radius;
+
+    const bead = document.createElement("span");
+    bead.className = "bead " + d.beadStyle;
+
+    if (i < letters.length) {
+      bead.classList.add("letter-bead");
+      if (d.glow) bead.classList.add("glow");
+      bead.textContent = letters[i];
+    } else {
+      bead.style.background = d.colours[i % d.colours.length];
+    }
+
+    bead.style.left = x + "px";
+    bead.style.top = y + "px";
+    bead.style.transform = "translate(-50%, -50%)";
+    bead.setAttribute("aria-hidden", "true");
+    preview.appendChild(bead);
+  }
+
+  $("charmPreview").textContent = d.charm === "none"
+    ? "♡ Your custom design ♡"
+    : charmIcons[d.charm] + " " +
+      d.metal.charAt(0).toUpperCase() + d.metal.slice(1) +
+      " charm " + charmIcons[d.charm];
+
+  $("charmPreview").style.color = charmMetalColours[d.metal];
+
+  $("price").textContent = money(d.price);
+
+  const parts = ["Base bracelet: " + money(basePrice)];
+
+  if (d.extras.beadStyle) {
+    parts.push("Bead style: " + money(d.extras.beadStyle));
+  }
+  if (d.extras.name) {
+    parts.push("Name beads: " + money(d.extras.name));
+  }
+  if (d.extras.glow) {
+    parts.push("Glow-in-the-dark: " + money(d.extras.glow));
+  }
+  if (d.extras.charm) {
+    parts.push("Charm: " + money(d.extras.charm));
+  }
+
+  $("priceBreakdown").textContent = parts.join(" + ");
+}
+
+function describeDesign(item) {
+  const parts = [
+    item.palette,
+    item.size,
+    item.beadStyle + " beads",
+    item.colours.length + " colour" + (item.colours.length === 1 ? "" : "s")
+  ];
+
+  if (item.letters) parts.push("Name: " + item.letters);
+  if (item.glow) parts.push("Glow-in-the-dark");
+  if (item.charm !== "none") {
+    parts.push(item.metal + " " + item.charm + " charm");
+  }
+
+  return parts.join(" · ");
+}
+
+function renderCart() {
+  const container = $("cartItems");
+  container.replaceChildren();
+
+  if (cart.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = "Your cart is empty.";
+    container.appendChild(empty);
+  }
+
+  cart.forEach((item, index) => {
+    const row = document.createElement("div");
+    row.className = "cart-item";
+
+    const description = document.createElement("p");
+    description.textContent = describeDesign(item);
+
+    const price = document.createElement("strong");
+    price.textContent = money(item.price);
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "secondary";
+    remove.textContent = "Remove";
+    remove.addEventListener("click", () => {
+      cart.splice(index, 1);
+      renderCart();
+    });
+
+    row.append(description, price, document.createElement("br"), remove);
+    container.appendChild(row);
+  });
+
+  $("cartCount").textContent = cart.length;
+  $("total").textContent = money(
+    cart.reduce((sum, item) => sum + item.price, 0)
+  );
+}
+
+$("palette").addEventListener("change", () => {
+  selectedColours = [];
+  renderSwatches();
+  drawPreview();
+});
+
+$("beadStyles").addEventListener("click", event => {
+  const button = event.target.closest("[data-style]");
+  if (!button) return;
+
+  selectedBeadStyle = button.dataset.style;
+
+  document.querySelectorAll("#beadStyles .choice").forEach(choice => {
+    const selected = choice === button;
+    choice.classList.toggle("selected", selected);
+    choice.setAttribute("aria-pressed", String(selected));
+  });
+
+  drawPreview();
+});
+
+["letters", "glow", "charm", "metal", "size"].forEach(id => {
+  $(id).addEventListener("input", drawPreview);
+  $(id).addEventListener("change", drawPreview);
+});
+
+$("addToCart").addEventListener("click", () => {
+  const design = currentDesign();
+
+  cart.push(design);
+  renderCart();
+
+  alert("Your bracelet has been added to the cart! ♡");
+});
+
+$("checkout").addEventListener("click", () => {
+  if (cart.length === 0) {
+    alert("Add a bracelet to your cart first.");
+    return;
+  }
+
+  $("checkoutPanel").hidden = false;
+  $("checkoutPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+$("orderForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  if (cart.length === 0) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  const summary = $("orderSummary");
+  summary.replaceChildren();
+
+  const box = document.createElement("div");
+  box.className = "summary-box";
+
+  const heading = document.createElement("h3");
+  heading.textContent = "Demo order summary ♡";
+
+  const greeting = document.createElement("p");
+  greeting.textContent = "Customer: " + $("customer").value;
+
+  const itemsHeading = document.createElement("strong");
+  itemsHeading.textContent = "Your bracelets:";
+
+  const list = document.createElement("ul");
+
+  cart.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = describeDesign(item) + " — " + money(item.price);
+    list.appendChild(li);
+  });
+
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+  const amount = document.createElement("p");
+  amount.textContent = "Total: " + money(total) + " (delivery excluded)";
+
+  const notice = document.createElement("p");
+  notice.textContent =
+    "This is a demo only. Your order has not been submitted and no payment was taken.";
+
+  box.append(heading, greeting, itemsHeading, list, amount, notice);
+  summary.appendChild(box);
+});
+
+renderSwatches();
+drawPreview();
+renderCart();
+
+// Redraw the circular preview when the layout changes.
+window.addEventListener("resize", drawPreview);
+</script>
+</body>
+</html>
